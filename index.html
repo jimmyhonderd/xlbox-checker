@@ -20,15 +20,26 @@ body{background-image:radial-gradient(ellipse 70% 50% at 50% -10%,rgba(233,180,0
 body.wel{background-image:radial-gradient(ellipse 90% 60% at 50% -10%,rgba(233,180,0,.28),transparent 65%)}
 #app{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto;gap:12px;
   padding:max(14px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+header{display:grid;gap:12px}
 .ttl{font-weight:700;font-size:clamp(20px,5.6vw,28px);letter-spacing:.08em;color:var(--yel);line-height:1;text-align:center;text-transform:uppercase;margin:0}
 .ttl small{display:block;font-weight:400;font-size:10px;letter-spacing:.42em;color:var(--mute);margin-top:6px}
+#locs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px}
+#locs::-webkit-scrollbar{display:none}
+.loc{appearance:none;flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#141416;color:var(--mute);
+  font:inherit;font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.loc b{font-weight:700;font-size:12px;min-width:20px;padding:1px 6px;border-radius:999px;background:#202024;color:var(--ink);font-variant-numeric:tabular-nums;text-align:center}
+.loc.vol b{background:rgba(233,180,0,.22);color:var(--yel)}
+.loc[aria-pressed=true]{background:var(--yel);border-color:var(--yel);color:#0a0a0b}
+.loc[aria-pressed=true] b{background:rgba(10,10,11,.18);color:#0a0a0b}
+.loc .bel{font-size:11px;line-height:1}
+.loc:focus-visible,.knop:focus-visible,.box:focus-visible{outline:2px solid var(--yel);outline-offset:2px}
 main{min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:14px}
 #hero{flex:1 0 auto;display:grid;place-content:center;text-align:center;padding:18px 0;min-height:34vh}
 main.lijst #hero{flex:0 0 auto;min-height:0;padding:10px 0 4px}
 #groot{font-weight:700;font-size:clamp(40px,13vw,84px);line-height:.95;letter-spacing:.02em;text-transform:uppercase;margin:0;text-wrap:balance}
 body.wel #groot{color:var(--yel);text-shadow:0 0 34px rgba(233,180,0,.45)}
 body.laden #groot{color:var(--mute)}
-#sub{margin:12px auto 0;max-width:30ch;color:var(--mute);font-size:16px;line-height:1.35}
+#sub{margin:12px auto 0;max-width:32ch;color:var(--mute);font-size:16px;line-height:1.35}
 #boxen{display:grid;gap:10px;margin:0;padding:0;list-style:none}
 .box{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:start;padding:14px;border-radius:12px;background:var(--card);
   border:1px solid rgba(233,180,0,.45);box-shadow:0 0 24px rgba(233,180,0,.08);color:inherit;text-decoration:none}
@@ -47,14 +58,16 @@ footer{display:grid;gap:10px}
   font:inherit;font-weight:700;font-size:14px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;cursor:pointer}
 .knop:active{background:#1d1d20}
 .knop[disabled]{opacity:.5}
-.knop:focus-visible,.box:focus-visible{outline:2px solid var(--yel);outline-offset:2px}
 @media (prefers-reduced-motion:no-preference){body.laden #groot{animation:adem 1.2s ease-in-out infinite alternate}}
 @keyframes adem{from{opacity:.45}to{opacity:1}}
 </style>
 </head>
 <body class="laden">
 <div id="app">
-  <header><h1 class="ttl">XLBox-checker<small>Arnhem · te huur</small></h1></header>
+  <header>
+    <h1 class="ttl">XLBox-checker<small>Garageboxen te huur</small></h1>
+    <nav id="locs" aria-label="Locatie"></nav>
+  </header>
   <main id="main">
     <section id="hero" aria-live="polite">
       <p id="groot">Even kijken</p>
@@ -77,19 +90,37 @@ footer{display:grid;gap:10px}
   var REPO = 'jimmyhonderd/xlbox-checker';
   var API = 'https://api.github.com/repos/' + REPO;
   var RAW = 'https://raw.githubusercontent.com/' + REPO + '/main/state.json';
-  var OVERZICHT = 'https://xlboxnederland.nl/objecten-overzicht/?plaats=Arnhem&verdiepingen=alle&type=te_huur';
   var BEWAAR = 'xlbox-laatste';
+  var BEWAAR_LOC = 'xlbox-locatie';
+  var STANDAARD_LOC = 'Arnhem';
   var ACHTER_NA_MIN = 75;   // checker hoort elk kwartier te lopen; GitHub is soms traag
   var DEMO = /[?&]demo=1/.test(location.search);
+  var LOC_UIT_URL = (location.search.match(/[?&]loc=([^&]+)/) || [])[1];
 
   var $ = function(id){ return document.getElementById(id); };
   var stand = null;   // {state, run:{tijd, ok}|null, opgehaald}
   var bezig = false;
+  var gekozen = STANDAARD_LOC;
+  try { gekozen = decodeURIComponent(LOC_UIT_URL || '') || localStorage.getItem(BEWAAR_LOC) || STANDAARD_LOC; } catch(e){}
 
-  $('site').href = OVERZICHT;
-
+  function overzicht(loc){
+    return 'https://xlboxnederland.nl/objecten-overzicht/?plaats=' + encodeURIComponent(loc) + '&verdiepingen=alle&type=te_huur';
+  }
   function veiligeUrl(u){
-    return (typeof u === 'string' && u.indexOf('https://xlboxnederland.nl/') === 0) ? u : OVERZICHT;
+    return (typeof u === 'string' && u.indexOf('https://xlboxnederland.nl/') === 0) ? u : overzicht(gekozen);
+  }
+  function prijsGetal(p){
+    var n = parseFloat(String(p || '').replace(/[^\d,]/g, '').replace(',', '.'));
+    return isNaN(n) ? Infinity : n;
+  }
+
+  // Oud formaat (alleen Arnhem, platte lijst) blijft leesbaar tot de checker het nieuwe schrijft.
+  function locatiesVan(state){
+    if (state && state.locaties && Object.keys(state.locaties).length) return state.locaties;
+    var bekend = (state && state.bekend) || {};
+    var boxen = Object.keys(bekend).filter(function(k){ return k.indexOf('http') === 0; }).map(function(k){ return bekend[k]; });
+    var uit = {}; uit[STANDAARD_LOC] = {aantal: boxen.length, boxen: boxen};
+    return uit;
   }
 
   function haalState(){
@@ -112,11 +143,21 @@ footer{display:grid;gap:10px}
   }
 
   function demoStand(){
+    function box(loc, nr, prijs, m2, etage, maat){
+      var slug = loc.toLowerCase() + '-' + nr.replace('.', '-');
+      return {titel: nr + '-' + loc, prijs: prijs, url: 'https://xlboxnederland.nl/garagebox/' + slug + '/', kenmerken: [m2 + ' m²', etage, maat]};
+    }
+    var L = {
+      Arnhem: {aantal: 2, boxen: [box('Arnhem','1.06','€ 225,00',18,'1e etage','516x350x275 (LxBxH)'), box('Arnhem','0.23','€ 378,00',31,'b.g.','557x467x375 (LxBxH)')]},
+      Gouda: {aantal: 0, boxen: []},
+      Leeuwarden: {aantal: 0, boxen: []},
+      Lelystad: {aantal: 1, boxen: [box('Lelystad','79','€ 199,00',16,'b.g.','600x300x300 (LxBxH)')]},
+      Nijmegen: {aantal: 3, boxen: [box('Nijmegen','3.19','€ 255,00',19,'3e etage','620x300x300 (LxBxH)'), box('Nijmegen','U-01','€ 310,00',24,'b.g.','600x400x350 (LxBxH)'), box('Nijmegen','3.32','€ 240,00',18,'3e etage','600x300x300 (LxBxH)')]},
+      Rotterdam: {aantal: 2, boxen: [box('Rotterdam','178','€ 289,00',21,'1e etage','700x300x300 (LxBxH)'), box('Rotterdam','233','€ 269,00',20,'2e etage','650x300x300 (LxBxH)')]},
+      Zoetermeer: {aantal: 0, boxen: []}
+    };
     return {
-      state: {bekend: {
-        'https://xlboxnederland.nl/garagebox/arnhem-1-06/': {titel:'1.06-Arnhem', prijs:'€ 225,00', url:'https://xlboxnederland.nl/garagebox/arnhem-1-06/', kenmerken:['18 m²','1e etage','250cm (H)','516x350x275 (LxBxH)']},
-        'https://xlboxnederland.nl/garagebox/arnhem-0-23/': {titel:'0.23-Arnhem', prijs:'€ 378,00', url:'https://xlboxnederland.nl/garagebox/arnhem-0-23/', kenmerken:['31 m²','b.g.','350cm (H)','557x467x375 (LxBxH)']}
-      }, fouten: 0},
+      state: {locaties: L, melden: ['Arnhem', 'Nijmegen'], fouten: 0, totaal: {site: 8, gelezen: 8}},
       run: {tijd: new Date(Date.now() - 4*60000).toISOString(), ok: true},
       opgehaald: Date.now()
     };
@@ -136,7 +177,7 @@ footer{display:grid;gap:10px}
   }
 
   function tekenTijd(){
-    if (!stand) { $('tijd').textContent = ' '; return; }
+    if (!stand) { $('tijd').textContent = ' '; return; }
     if (stand.run && stand.run.tijd) {
       var t = Date.parse(stand.run.tijd);
       $('tijd').textContent = 'Laatste check: ' + geleden(t) + ' (' + klok(t) + ')';
@@ -145,11 +186,39 @@ footer{display:grid;gap:10px}
     }
   }
 
+  function kies(loc){
+    gekozen = loc;
+    try { localStorage.setItem(BEWAAR_LOC, loc); } catch(e){}
+    teken(false);
+    $('main').scrollTop = 0;
+  }
+
+  function tekenKeuze(locaties, melden){
+    var nav = $('locs');
+    nav.textContent = '';
+    Object.keys(locaties).sort().forEach(function(naam){
+      var n = (locaties[naam].boxen || []).length;
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'loc' + (n > 0 ? ' vol' : '');
+      b.setAttribute('aria-pressed', naam === gekozen ? 'true' : 'false');
+      b.appendChild(document.createTextNode(naam));
+      var tel = document.createElement('b'); tel.textContent = n; b.appendChild(tel);
+      if (melden.indexOf(naam) >= 0) {
+        var bel = document.createElement('span'); bel.className = 'bel'; bel.textContent = '🔔'; bel.title = 'pushmelding aan';
+        b.appendChild(bel);
+      }
+      b.addEventListener('click', function(){ kies(naam); });
+      nav.appendChild(b);
+      if (naam === gekozen) setTimeout(function(){ b.scrollIntoView({block:'nearest', inline:'center'}); }, 0);
+    });
+  }
+
   function teken(fout){
     document.body.classList.remove('laden');
     var lijst = $('boxen');
     lijst.textContent = '';
     var meldingen = [];
+    $('site').href = overzicht(gekozen);
 
     if (!stand) {
       document.body.classList.remove('wel');
@@ -161,18 +230,23 @@ footer{display:grid;gap:10px}
       return;
     }
 
-    var bekend = (stand.state && stand.state.bekend) || {};
-    var boxen = Object.keys(bekend).map(function(k){ return bekend[k]; });
+    var locaties = locatiesVan(stand.state);
+    var melden = (stand.state && stand.state.melden) || [];
+    if (!locaties[gekozen]) gekozen = locaties[STANDAARD_LOC] ? STANDAARD_LOC : Object.keys(locaties).sort()[0];
+    tekenKeuze(locaties, melden);
+
+    var boxen = (locaties[gekozen].boxen || []).slice().sort(function(a, b){ return prijsGetal(a.prijs) - prijsGetal(b.prijs); });
     var n = boxen.length;
+    var meldAan = melden.indexOf(gekozen) >= 0;
 
     document.body.classList.toggle('wel', n > 0);
     $('main').classList.toggle('lijst', n > 0);
     if (n === 0) {
       $('groot').textContent = 'Geen box';
-      $('sub').textContent = 'Er staat nu niets te huur in Arnhem.';
+      $('sub').textContent = 'Er staat nu niets te huur in ' + gekozen + '.' + (meldAan ? ' Komt er iets, dan krijg je een pushmelding.' : '');
     } else {
       $('groot').textContent = (n === 1 ? '1 box' : n + ' boxen') + ' te huur';
-      $('sub').textContent = n === 1 ? 'Tik op de box om hem te bekijken.' : 'Tik op een box om hem te bekijken.';
+      $('sub').textContent = 'In ' + gekozen + ', goedkoopste eerst. Tik op een box om hem te bekijken.';
     }
 
     boxen.forEach(function(b){
@@ -190,6 +264,9 @@ footer{display:grid;gap:10px}
     if (fout) meldingen.push('Verversen lukte niet; je ziet de stand van ' + geleden(stand.opgehaald) + '.');
     if (stand.state && stand.state.fouten > 0)
       meldingen.push('De XLBox-site was de laatste ' + stand.state.fouten + ' keer niet leesbaar voor de checker. Kijk voor de zekerheid zelf op de site.');
+    var tot = stand.state && stand.state.totaal;
+    if (tot && tot.gelezen < tot.site)
+      meldingen.push('De checker kon ' + (tot.site - tot.gelezen) + ' van de ' + tot.site + ' boxen niet lezen; de aantallen kunnen te laag zijn.');
     if (stand.run && stand.run.ok === false) meldingen.push('De laatste check op GitHub is mislukt.');
     if (stand.run && stand.run.tijd && Date.now() - Date.parse(stand.run.tijd) > ACHTER_NA_MIN * 60000)
       meldingen.push('De checker loopt achter: de laatste check was ' + geleden(Date.parse(stand.run.tijd)) + '.');

@@ -2,7 +2,7 @@
   "id": "/xlbox-checker/",
   "name": "XLBox-checker",
   "short_name": "XLBox",
-  "description": "Staat er in Arnhem een XLBox te huur? By LEDJOCKEY.",
+  "description": "Welke XLBox-garageboxen staan te huur, per locatie? By LEDJOCKEY.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
