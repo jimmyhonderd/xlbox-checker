@@ -1,0 +1,42 @@
+name: XLBox check
+
+on:
+  schedule:
+    # Elk kwartier (tijden in UTC; GitHub start geplande runs soms 5-20 min later).
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Stuur een testmelding naar je telefoon"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: xlbox-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check XLBox
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python3 check.py ${{ inputs.test && '--test' || '' }}
+
+      - name: State bewaren
+        if: always()
+        run: |
+          if ! git diff --quiet -- state.json; then
+            git config user.name "xlbox-checker"
+            git config user.email "xlbox-checker@users.noreply.github.com"
+            git add state.json
+            git commit -m "state bijgewerkt"
+            git push
+          fi
