@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="application-name" content="XLBox-checker">
+<title>XLBox-checker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#0a0a0b;--yel:#E9B400;--red:#ff2032;--ink:#f2f0ea;--mute:#8a877f;--line:#1c1c1f;--card:#121214}
+*{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3","Myriad Pro",Myriad,"Segoe UI",system-ui,sans-serif;touch-action:manipulation}
+body{background-image:radial-gradient(ellipse 70% 50% at 50% -10%,rgba(233,180,0,.10),transparent 60%)}
+body.wel{background-image:radial-gradient(ellipse 90% 60% at 50% -10%,rgba(233,180,0,.28),transparent 65%)}
+#app{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto;gap:12px;
+  padding:max(14px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.ttl{font-weight:700;font-size:clamp(20px,5.6vw,28px);letter-spacing:.08em;color:var(--yel);line-height:1;text-align:center;text-transform:uppercase;margin:0}
+.ttl small{display:block;font-weight:400;font-size:10px;letter-spacing:.42em;color:var(--mute);margin-top:6px}
+main{min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:14px}
+#hero{flex:1 0 auto;display:grid;place-content:center;text-align:center;padding:18px 0;min-height:34vh}
+main.lijst #hero{flex:0 0 auto;min-height:0;padding:10px 0 4px}
+#groot{font-weight:700;font-size:clamp(40px,13vw,84px);line-height:.95;letter-spacing:.02em;text-transform:uppercase;margin:0;text-wrap:balance}
+body.wel #groot{color:var(--yel);text-shadow:0 0 34px rgba(233,180,0,.45)}
+body.laden #groot{color:var(--mute)}
+#sub{margin:12px auto 0;max-width:30ch;color:var(--mute);font-size:16px;line-height:1.35}
+#boxen{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.box{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:start;padding:14px;border-radius:12px;background:var(--card);
+  border:1px solid rgba(233,180,0,.45);box-shadow:0 0 24px rgba(233,180,0,.08);color:inherit;text-decoration:none}
+.box:active{background:#19191c}
+.box h2{margin:0;font-size:20px;font-weight:700;letter-spacing:.02em;overflow-wrap:anywhere}
+.box .prijs{font-size:22px;font-weight:700;color:var(--yel);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.box .prijs small{display:block;font-size:10px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+.box ul{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0;padding:0;list-style:none}
+.box li{font-size:13px;color:var(--ink);background:#1b1b1e;border-radius:999px;padding:3px 10px;font-variant-numeric:tabular-nums}
+#meld{margin:0;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,32,50,.5);background:rgba(255,32,50,.08);color:#ffb3ba;font-size:14px;line-height:1.35}
+#meld[hidden]{display:none}
+footer{display:grid;gap:10px}
+#tijd{margin:0;text-align:center;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-variant-numeric:tabular-nums}
+.knoppen{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.knop{appearance:none;display:grid;place-items:center;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:#141416;color:var(--ink);
+  font:inherit;font-weight:700;font-size:14px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;cursor:pointer}
+.knop:active{background:#1d1d20}
+.knop[disabled]{opacity:.5}
+.knop:focus-visible,.box:focus-visible{outline:2px solid var(--yel);outline-offset:2px}
+@media (prefers-reduced-motion:no-preference){body.laden #groot{animation:adem 1.2s ease-in-out infinite alternate}}
+@keyframes adem{from{opacity:.45}to{opacity:1}}
+</style>
+</head>
+<body class="laden">
+<div id="app">
+  <header><h1 class="ttl">XLBox-checker<small>Arnhem · te huur</small></h1></header>
+  <main id="main">
+    <section id="hero" aria-live="polite">
+      <p id="groot">Even kijken</p>
+      <p id="sub">Laatste stand ophalen…</p>
+    </section>
+    <ul id="boxen"></ul>
+    <p id="meld" hidden></p>
+  </main>
+  <footer>
+    <p id="tijd">&nbsp;</p>
+    <div class="knoppen">
+      <button class="knop" id="ververs" type="button">Ververs</button>
+      <a class="knop" id="site" target="_blank" rel="noopener">XLBox-site ↗</a>
+    </div>
+  </footer>
+</div>
+<script>
+(function(){
+  'use strict';
+  var REPO = 'jimmyhonderd/xlbox-checker';
+  var API = 'https://api.github.com/repos/' + REPO;
+  var RAW = 'https://raw.githubusercontent.com/' + REPO + '/main/state.json';
+  var OVERZICHT = 'https://xlboxnederland.nl/objecten-overzicht/?plaats=Arnhem&verdiepingen=alle&type=te_huur';
+  var BEWAAR = 'xlbox-laatste';
+  var ACHTER_NA_MIN = 75;   // checker hoort elk kwartier te lopen; GitHub is soms traag
+  var DEMO = /[?&]demo=1/.test(location.search);
+
+  var $ = function(id){ return document.getElementById(id); };
+  var stand = null;   // {state, run:{tijd, ok}|null, opgehaald}
+  var bezig = false;
+
+  $('site').href = OVERZICHT;
+
+  function veiligeUrl(u){
+    return (typeof u === 'string' && u.indexOf('https://xlboxnederland.nl/') === 0) ? u : OVERZICHT;
+  }
+
+  function haalState(){
+    return fetch(API + '/contents/state.json', {headers:{Accept:'application/vnd.github.raw+json'}, cache:'no-store'})
+      .then(function(r){ if(!r.ok) throw new Error('api ' + r.status); return r.json(); })
+      .catch(function(){
+        return fetch(RAW + '?t=' + Date.now(), {cache:'no-store'})
+          .then(function(r){ if(!r.ok) throw new Error('raw ' + r.status); return r.json(); });
+      });
+  }
+
+  function haalRun(){
+    return fetch(API + '/actions/workflows/check.yml/runs?per_page=1&status=completed', {cache:'no-store'})
+      .then(function(r){ if(!r.ok) throw new Error('runs ' + r.status); return r.json(); })
+      .then(function(j){
+        var run = j.workflow_runs && j.workflow_runs[0];
+        return run ? {tijd: run.updated_at, ok: run.conclusion === 'success'} : null;
+      })
+      .catch(function(){ return null; });   // tijdstip is bijzaak; de stand zelf telt
+  }
+
+  function demoStand(){
+    return {
+      state: {bekend: {
+        'https://xlboxnederland.nl/garagebox/arnhem-1-06/': {titel:'1.06-Arnhem', prijs:'€ 225,00', url:'https://xlboxnederland.nl/garagebox/arnhem-1-06/', kenmerken:['18 m²','1e etage','250cm (H)','516x350x275 (LxBxH)']},
+        'https://xlboxnederland.nl/garagebox/arnhem-0-23/': {titel:'0.23-Arnhem', prijs:'€ 378,00', url:'https://xlboxnederland.nl/garagebox/arnhem-0-23/', kenmerken:['31 m²','b.g.','350cm (H)','557x467x375 (LxBxH)']}
+      }, fouten: 0},
+      run: {tijd: new Date(Date.now() - 4*60000).toISOString(), ok: true},
+      opgehaald: Date.now()
+    };
+  }
+
+  function geleden(ms){
+    var min = Math.round((Date.now() - ms) / 60000);
+    if (min < 1) return 'zojuist';
+    if (min < 60) return min + ' min geleden';
+    var uur = Math.floor(min / 60);
+    if (uur < 24) return uur + ' uur geleden';
+    var d = Math.floor(uur / 24);
+    return d + (d === 1 ? ' dag' : ' dagen') + ' geleden';
+  }
+  function klok(ms){
+    return new Date(ms).toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit'});
+  }
+
+  function tekenTijd(){
+    if (!stand) { $('tijd').textContent = ' '; return; }
+    if (stand.run && stand.run.tijd) {
+      var t = Date.parse(stand.run.tijd);
+      $('tijd').textContent = 'Laatste check: ' + geleden(t) + ' (' + klok(t) + ')';
+    } else {
+      $('tijd').textContent = 'Opgehaald: ' + geleden(stand.opgehaald) + ' (' + klok(stand.opgehaald) + ')';
+    }
+  }
+
+  function teken(fout){
+    document.body.classList.remove('laden');
+    var lijst = $('boxen');
+    lijst.textContent = '';
+    var meldingen = [];
+
+    if (!stand) {
+      document.body.classList.remove('wel');
+      $('main').classList.remove('lijst');
+      $('groot').textContent = 'Geen gegevens';
+      $('sub').textContent = 'De laatste stand kon niet worden opgehaald. Controleer je verbinding en ververs.';
+      $('meld').hidden = true;
+      tekenTijd();
+      return;
+    }
+
+    var bekend = (stand.state && stand.state.bekend) || {};
+    var boxen = Object.keys(bekend).map(function(k){ return bekend[k]; });
+    var n = boxen.length;
+
+    document.body.classList.toggle('wel', n > 0);
+    $('main').classList.toggle('lijst', n > 0);
+    if (n === 0) {
+      $('groot').textContent = 'Geen box';
+      $('sub').textContent = 'Er staat nu niets te huur in Arnhem.';
+    } else {
+      $('groot').textContent = (n === 1 ? '1 box' : n + ' boxen') + ' te huur';
+      $('sub').textContent = n === 1 ? 'Tik op de box om hem te bekijken.' : 'Tik op een box om hem te bekijken.';
+    }
+
+    boxen.forEach(function(b){
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.className = 'box'; a.href = veiligeUrl(b.url); a.target = '_blank'; a.rel = 'noopener';
+      var h = document.createElement('h2'); h.textContent = b.titel || 'Box';
+      var p = document.createElement('div'); p.className = 'prijs'; p.textContent = b.prijs || '';
+      if (b.prijs) { var s = document.createElement('small'); s.textContent = 'per maand'; p.appendChild(s); }
+      var ul = document.createElement('ul');
+      (b.kenmerken || []).forEach(function(k){ var x = document.createElement('li'); x.textContent = k; ul.appendChild(x); });
+      a.appendChild(h); a.appendChild(p); a.appendChild(ul); li.appendChild(a); lijst.appendChild(li);
+    });
+
+    if (fout) meldingen.push('Verversen lukte niet; je ziet de stand van ' + geleden(stand.opgehaald) + '.');
+    if (stand.state && stand.state.fouten > 0)
+      meldingen.push('De XLBox-site was de laatste ' + stand.state.fouten + ' keer niet leesbaar voor de checker. Kijk voor de zekerheid zelf op de site.');
+    if (stand.run && stand.run.ok === false) meldingen.push('De laatste check op GitHub is mislukt.');
+    if (stand.run && stand.run.tijd && Date.now() - Date.parse(stand.run.tijd) > ACHTER_NA_MIN * 60000)
+      meldingen.push('De checker loopt achter: de laatste check was ' + geleden(Date.parse(stand.run.tijd)) + '.');
+
+    $('meld').hidden = meldingen.length === 0;
+    $('meld').textContent = meldingen.join(' ');
+    tekenTijd();
+  }
+
+  function ververs(){
+    if (bezig) return;
+    bezig = true;
+    $('ververs').disabled = true;
+    var klaar = function(fout){
+      bezig = false;
+      $('ververs').disabled = false;
+      teken(fout);
+    };
+    if (DEMO) { stand = demoStand(); klaar(false); return; }
+    Promise.all([haalState(), haalRun()]).then(function(r){
+      stand = {state: r[0], run: r[1], opgehaald: Date.now()};
+      try { localStorage.setItem(BEWAAR, JSON.stringify(stand)); } catch(e){}
+      klaar(false);
+    }).catch(function(){
+      klaar(true);
+    });
+  }
+
+  // Start: toon meteen de laatst bekende stand, haal daarna de verse op.
+  try {
+    var oud = JSON.parse(localStorage.getItem(BEWAAR) || 'null');
+    if (!DEMO && oud && oud.state) { stand = oud; teken(false); }
+  } catch(e){}
+
+  $('ververs').addEventListener('click', ververs);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) ververs(); });
+  setInterval(function(){ if (!document.hidden) ververs(); }, 5 * 60000);
+  setInterval(tekenTijd, 30000);
+  ververs();
+
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  }
+})();
+</script>
+</body>
+</html>
