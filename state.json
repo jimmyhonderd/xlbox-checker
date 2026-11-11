@@ -171,7 +171,7 @@
  },
  "fout_gemeld": false,
  "fouten": 0,
- "hartslag": "2026-11-10",
+ "hartslag": "2026-11-11",
  "locaties": {
   "Arnhem": {
    "aantal": 0,
@@ -3099,14 +3099,14 @@
    "boxen": [
     {
      "kenmerken": [
-      "31 m²",
+      "12 m²",
       "b.g.",
-      "275cm (H)",
-      "765x410x300 (LxBxH)"
+      "250cm (H)",
+      "237x500x300 (LxBxH)"
      ],
-     "prijs": "€ 415,00",
-     "titel": "0.22-Zoetermeer",
-     "url": "https://xlboxnederland.nl/garagebox/zoetermeer-0-22/"
+     "prijs": "€ 225,00",
+     "titel": "0.03-Zoetermeer",
+     "url": "https://xlboxnederland.nl/garagebox/zoetermeer-0-03/"
     },
     {
      "kenmerken": [
