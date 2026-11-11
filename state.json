@@ -68,6 +68,17 @@
     "titel": "2.26-Nijmegen",
     "url": "https://xlboxnederland.nl/garagebox/nijmegen-2-26/"
    },
+   "https://xlboxnederland.nl/garagebox/nijmegen-2-33/": {
+    "kenmerken": [
+     "19 m²",
+     "2e etage",
+     "250cm (H)",
+     "574x331x275 (LxBxH)"
+    ],
+    "prijs": "€ 241,00",
+    "titel": "2.33 -Nijmegen",
+    "url": "https://xlboxnederland.nl/garagebox/nijmegen-2-33/"
+   },
    "https://xlboxnederland.nl/garagebox/nijmegen-3-04/": {
     "kenmerken": [
      "18 m²",
@@ -178,7 +189,7 @@
    "boxen": []
   },
   "Gouda": {
-   "aantal": 38,
+   "aantal": 40,
    "boxen": [
     {
      "kenmerken": [
@@ -424,6 +435,17 @@
     },
     {
      "kenmerken": [
+      "11 m²",
+      "3e etage",
+      "275cm (H)",
+      "265x400x300 (LxBxH)"
+     ],
+     "prijs": "€ 185,00",
+     "titel": "3.29 (231)-Gouda",
+     "url": "https://xlboxnederland.nl/garagebox/gouda-3-29-231/"
+    },
+    {
+     "kenmerken": [
       "21 m²",
       "3e etage",
       "275cm (H)",
@@ -575,6 +597,17 @@
      "prijs": "€ 289,00",
      "titel": "4.46 (321) 2x MND GRATIS-Gouda",
      "url": "https://xlboxnederland.nl/garagebox/gouda-4-46-321-2x-mnd-gratis/"
+    },
+    {
+     "kenmerken": [
+      "72 m²",
+      "4e etage",
+      "275cm (H)",
+      "1195x605x300 (LxBxH)"
+     ],
+     "prijs": "€ 875,00",
+     "titel": "4.57 (311)-Gouda",
+     "url": "https://xlboxnederland.nl/garagebox/gouda-4-57-311/"
     },
     {
      "kenmerken": [
@@ -1589,7 +1622,7 @@
    ]
   },
   "Nijmegen": {
-   "aantal": 15,
+   "aantal": 16,
    "boxen": [
     {
      "kenmerken": [
@@ -1656,6 +1689,17 @@
      "prijs": "€ 256,00",
      "titel": "2.26-Nijmegen",
      "url": "https://xlboxnederland.nl/garagebox/nijmegen-2-26/"
+    },
+    {
+     "kenmerken": [
+      "19 m²",
+      "2e etage",
+      "250cm (H)",
+      "574x331x275 (LxBxH)"
+     ],
+     "prijs": "€ 241,00",
+     "titel": "2.33 -Nijmegen",
+     "url": "https://xlboxnederland.nl/garagebox/nijmegen-2-33/"
     },
     {
      "kenmerken": [
@@ -1759,7 +1803,7 @@
    ]
   },
   "Rotterdam": {
-   "aantal": 121,
+   "aantal": 122,
    "boxen": [
     {
      "kenmerken": [
@@ -2178,6 +2222,17 @@
      "prijs": "€ 510,00",
      "titel": "21-Rotterdam",
      "url": "https://xlboxnederland.nl/garagebox/rotterdam-21/"
+    },
+    {
+     "kenmerken": [
+      "14 m²",
+      "2e etage",
+      "275cm (H)",
+      "405x350x300 (LxBxH)"
+     ],
+     "prijs": "€ 233,00",
+     "titel": "211-Rotterdam",
+     "url": "https://xlboxnederland.nl/garagebox/rotterdam-211/"
     },
     {
      "kenmerken": [
@@ -3095,7 +3150,7 @@
    ]
   },
   "Zoetermeer": {
-   "aantal": 3,
+   "aantal": 2,
    "boxen": [
     {
      "kenmerken": [
@@ -3107,17 +3162,6 @@
      "prijs": "€ 225,00",
      "titel": "0.03-Zoetermeer",
      "url": "https://xlboxnederland.nl/garagebox/zoetermeer-0-03/"
-    },
-    {
-     "kenmerken": [
-      "12 m²",
-      "1e etage",
-      "250cm (H)",
-      "375x312x300 (LxBxH)"
-     ],
-     "prijs": "€ 215,00",
-     "titel": "1.30-Zoetermeer",
-     "url": "https://xlboxnederland.nl/garagebox/zoetermeer-1-30/"
     },
     {
      "kenmerken": [
@@ -3138,8 +3182,8 @@
   "Nijmegen"
  ],
  "totaal": {
-  "gelezen": 269,
-  "huur": 266,
-  "site": 269
+  "gelezen": 272,
+  "huur": 269,
+  "site": 272
  }
 }
